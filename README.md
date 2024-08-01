@@ -1,10 +1,11 @@
 Unlocking Corporate Insights with AI: Your Interactive Financial Analyst
 Imagine having an AI-powered analyst that instantly distills the most critical information from a company's financial statements, news, and market trends. That's exactly what we're building today!
-In this codelab, you'll harness the power of Google Cloud and cutting-edge AI to create GC CorpSpectrum, an interactive tool that transforms complex financial data into actionable insights. We'll guide you through:
-  Data Fusion: Seamlessly gather and process information from diverse sources like SEC filings, news articles, and financial databases.
-  AI-Driven Analysis: Extract key financial metrics, uncover market trends, and gauge sentiment using state-of-the-art natural language processing models.
-  Interactive Chatbot: Engage in a conversation with your data, asking questions and receiving insightful summaries tailored to your needs.
-By the end, you'll have a powerful tool to navigate the corporate landscape, all while gaining hands-on experience with Google Cloud's most innovative technologies. Let's dive in!
+•	In this codelab, you'll harness the power of Google Cloud and cutting-edge AI to create GC CorpSpectrum, an interactive tool that transforms complex financial data into actionable insights. We'll guide you through:
+•	Data Fusion: Seamlessly gather and process information from diverse sources like SEC filings, news articles, and financial databases.
+•	AI-Driven Analysis: Extract key financial metrics, uncover market trends, and gauge sentiment using state-of-the-art natural language processing models.
+•	Interactive Chatbot: Engage in a conversation with your data, asking questions and receiving insightful summaries tailored to your needs.
+•	By the end, you'll have a powerful tool to navigate the corporate landscape, all while gaining hands-on experience with Google Cloud's most innovative technologies. Let's dive in!
+
 
 Getting Started
  * Prerequisites:
@@ -35,6 +36,7 @@ Future Enhancements
  * Personalized investment recommendation engine.
 
 About Code
+
 Data Flow:
 User inputs company name and uploads PDF to Google Cloud Storage.
 Gemini Pro extracts company details.
