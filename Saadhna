@@ -1,0 +1,319 @@
+# Setup
+!pip install google-cloud-storage
+from google.cloud import storage
+import os
+# Authenticate to Google Cloud
+from google.colab import auth
+auth.authenticate_user()
+# Define Functions to upload file in gcs
+
+def upload_file_to_gcs(file_path, bucket_name, destination_blob_name):
+    """Uploads a file to the bucket."""
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(destination_blob_name)
+    blob.upload_from_filename(file_path)
+    print(f"File {file_path} uploaded to {destination_blob_name}.")
+
+    # Construct and return the full GCS path
+    gcs_path = f"gs://{bucket_name}/{destination_blob_name}"
+    return gcs_path # Return the full GCS path
+print(annual_statement_path_i)
+!pip install PyPDF2
+from google.cloud import storage
+from io import BytesIO
+import smart_open
+from tempfile import NamedTemporaryFile
+
+def get_pdf_temp_url(bucket_name, object_name):
+    """Downloads a PDF from GCS and returns a temporary file-like URL.
+
+    Args:
+        bucket_name: The name of the GCS bucket.
+        object_name: The name of the PDF object within the bucket.
+
+    Returns:
+        str: A temporary URL that can be used to access the PDF in memory.
+    """
+
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(object_name)
+
+    # Download directly into memory
+    pdf_bytes = BytesIO()
+    blob.download_to_file(pdf_bytes)
+    pdf_bytes.seek(0)
+
+    # Create a temporary file-like object
+    with NamedTemporaryFile(suffix=".pdf", delete=False) as temp_file:
+        temp_file.write(pdf_bytes.getvalue())
+        temp_file_path = temp_file.name
+
+    # Generate a file-like URL using smart_open
+    pdf_url = smart_open.open(f"file://{temp_file_path}", "rb").name
+
+    return pdf_url
+
+# Example Usage:
+from langchain.document_loaders import PyPDFLoader
+
+
+# user prompt trigger for file upload
+def prompt_user_for_input():
+    """Prompts the user for input and returns the provided data."""
+    print("Please provide input for the following fields:")
+    annual_statement_i = input("Upload Annual Statement (pdf file): ")
+    company_name_i = input("Enter Company Name: ")
+    return annual_statement_i, company_name_i    #return annual_statement_i and company_name_i
+bucket_name = "corp_spec"
+object_name = "input_documents/annual_statement.pdf"
+
+pdf_url = get_pdf_temp_url(bucket_name, object_name)
+print(pdf_url)
+# file path in gcs
+bucket_name = 'corp_spec'
+folder_name = 'input_documents'
+
+annual_statement_i, company_name_i = prompt_user_for_input()
+
+annual_statement_path_i = None
+annual_statement_path_i = upload_file_to_gcs(annual_statement_i, bucket_name, f"{folder_name}/annual_statement.{annual_statement_i.split('.')[-1]}")
+
+company_name = company_name_i
+print("Annual statement uploaded to:", annual_statement_path_i)
+#Module 3: Initialize LLM model- gemini-1.5-pro-001
+# initiate setup and libraries
+import base64
+import vertexai
+import json
+from vertexai.generative_models import GenerativeModel, Part, FinishReason
+import vertexai.preview.generative_models as generative_models
+from vertexai.preview.language_models import TextGenerationModel
+PROJECT_ID = "trans-density-429404-a6"  # @param {type:"string"}
+LOCATION = "us-central1"  # @param {type:"string"}
+
+import vertexai
+
+vertexai.init(project=PROJECT_ID, location=LOCATION)
+import IPython.display
+from IPython.core.interactiveshell import InteractiveShell
+
+InteractiveShell.ast_node_interactivity = "all"
+
+from vertexai.generative_models import (
+    GenerationConfig,
+    GenerativeModel,
+    HarmBlockThreshold,
+    HarmCategory,
+    Part,
+)
+MODEL_ID = "gemini-1.5-pro-001"  # @param {type:"string"}
+
+model = GenerativeModel(MODEL_ID)
+generation_config = {
+    "max_output_tokens": 8192,
+    "temperature": 1,
+    "top_p": 0.95,
+}
+
+safety_settings = {
+    generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+}
+
+# Module 6: Extract general details about company- Company name, website, Relevant Industry and Products
+prompt = f"""for this company: {company_name}, generate following fields- Company website, Relevant Industries, List of close competitors, (Products and/or services)"""
+print(prompt)
+# considering we have company name, using LLM, we will generate a. Company website, b. check whether company is Public listed company(1 or 0), c. if yes (1), generate the link to latest annual statement of the company
+# exception, in case data is not available, or compny recently listed
+def generate(prompt):
+    vertexai.inift(project="trans-density-429404-a6", location="us-central1")
+    model = GenerativeModel(
+        "gemini-1.5-pro-001",
+        system_instruction=["""you have a company name as input, generate only the data asked in prompt in this format-
+        field x: generated data relevant to field x
+        ; field y: generated data relevant to field y"""]
+    )
+
+    responses = model.generate_content(
+        [prompt],
+        generation_config=generation_config,
+        safety_settings=safety_settings,
+        stream=True,
+    )
+
+    full_response_text = ""
+    for response in responses:
+        full_response_text += response.text
+    # Return the full response text
+    return full_response_text
+
+generation_config = {
+    "max_output_tokens": 8192,
+    "temperature": 1,
+    "top_p": 0.95,
+}
+
+safety_settings = {
+    generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+}
+
+# Generate responses and store the result
+saved_response_prep = generate(prompt)
+
+# Print the saved response
+print(saved_response_prep)
+fields = saved_response_prep.split(';')
+
+# Initialize variables to store the extracted values
+company_website = "N/A"
+relevant_industry = "N/A"
+competitors ="N/A"
+products = "N/A"
+#listed_status = "N/A"
+#link_annual_st = "N/A"
+
+
+# Iterate over the fields and extract key-value pairs
+for field in fields:
+    if ':' in field:
+        key, value = field.split(':', 1)  # Split only at the first occurrence of ':'
+        key = key.strip()
+        value = value.strip()
+
+        if key == "Company website":
+            company_website = value
+        elif key == "Relevant Industries":
+            relevant_industry = value
+        elif key == "List of close competitors":
+            competitors = value
+        elif key == "Products and/or services":
+            products = value
+
+# Loop through the variable names and values to print them
+for var_name in [
+    "company_website", "relevant_industry", "competitors", "products"
+]:
+    value = globals()[var_name]  # Get the value of the variable using its name
+    print(f"{var_name.replace('_', ' ')}: {value}")
+#Module 8: Call Custom Search Engine to extract latest News and trends on Company and Industry
+# First, install the required libraries
+!pip install google-api-python-client
+
+# Import necessary libraries
+from googleapiclient.discovery import build
+
+# Define your API key and Search Engine ID
+from google.colab import userdata
+
+api_key = userdata.get('APIkeyCSE')
+cse_id = userdata.get('CSEid')
+# Function to perform Google search on Industry and trends
+def google_search(query, api_key, cse_id, **kwargs):
+    service = build("customsearch", "v1", developerKey=api_key)
+    res = service.cse().list(q=query, cx=cse_id, **kwargs).execute()
+    return res
+
+# Sample query
+query = f"""Industry report and trends for: {relevant_industry}"""
+
+# Perform the search
+results = google_search(query, api_key, cse_id)
+
+# Display results
+for item in results.get('items', []):
+    print(f"Title: {item['title']}")
+    print(f"Snippet: {item['snippet']}")
+    print(f"Link: {item['link']}\n")
+
+print(results)
+#print(results)
+industry_title = []
+industry_snippet = []
+for item in results.get('items', []):
+    industry_title.append(f"Title: {item['title']}")
+#    industry_snippet.append(f"Snippet: {item['snippet']}")
+    industry_snippet.append(f"{item['snippet']}")
+print(f"industry news titles are {industry_title}")
+print(f"industry news snippets are {industry_snippet}")
+
+# Sentiment analysis
+from textblob import TextBlob
+
+# Initialize the TextBlob object with the news text
+# ticker1 = yf.Ticker(ticker)
+# news = ticker1.news
+
+# Extract sentiment scores
+sentiment_scores = []
+for item in results.get('items', []):
+    analysis = TextBlob(item['snippet'])
+    sentiment_scores.append(analysis.sentiment.polarity)  # -1 (negative) to 1 (positive)
+
+average_sentiment = sum(sentiment_scores) / len(sentiment_scores)
+print("Average News Sentiment:", average_sentiment)
+
+def analyze_sentiment(score):
+    if score > 0.1:
+        return "Positive"
+    elif score < -0.1:
+        return "Negative"
+    else:
+        return "Neutral"
+
+sentiment = analyze_sentiment(average_sentiment)
+print("Overall Sentiment:", sentiment)
+
+sentiment_category = analyze_sentiment(average_sentiment)
+print(f"Average News Sentiment: {average_sentiment:.3f} ({sentiment_category})")
+
+if sentiment_category == "Positive":
+    print("Significance: This suggests a generally favorable outlook for  based on recent news coverage. Investors may interpret this as a sign of positive momentum.")
+elif sentiment_category == "Negative":
+    print("Significance: This indicates a negative sentiment towards in recent news. Investors may interpret this as a warning sign or a potential for downward pressure on the stock price.")
+else:
+    print("Significance: News sentiment is neutral, suggesting a lack of strong positive or negative opinions about in recent coverage. Investors may look for other indicators to gauge market sentiment.")
+
+# if sentiment_category == "Positive":
+#     print(f"Significance: This suggests a generally favorable outlook for {ticker} based on recent news coverage. Investors may interpret this as a sign of positive momentum.")
+# elif sentiment_category == "Negative":
+#     print(f"Significance: This indicates a negative sentiment towards {ticker} in recent news. Investors may interpret this as a warning sign or a potential for downward pressure on the stock price.")
+# else:
+#     print(f"Significance: News sentiment is neutral, suggesting a lack of strong positive or negative opinions about {ticker} in recent coverage. Investors may look for other indicators to gauge market sentiment.")
+
+# Function to perform News of company
+def google_search(query, api_key, cse_id, **kwargs):
+    service = build("customsearch", "v1", developerKey=api_key)
+    res = service.cse().list(q=query, cx=cse_id, **kwargs).execute()
+    return res
+
+# Sample query
+query = f"""Latest News and trends of: {company_name}"""
+
+# Perform the search
+results = google_search(query, api_key, cse_id)
+
+# Display results
+for item in results.get('items', []):
+    print(f"Title: {item['title']}")
+    print(f"Snippet: {item['snippet']}")
+    print(f"Link: {item['link']}\n")
+
+#print(results)
+company_title = []
+company_snippet = []
+for item in results.get('items', []):
+    company_title.append(f"Title: {item['title']}")
+#    company_snippet.append(f"Snippet: {item['snippet']}")
+    company_snippet.append(f"{item['snippet']}")
+print(f"company news titles are {company_title}")
+print(f"company news snippets are {company_snippet}")
+
+
+
