@@ -44,61 +44,61 @@ Future Enhancements
 About Code
 
 Data Flow:
-User inputs company name and uploads PDF to Google Cloud Storage.
-Gemini Pro extracts company details.
-Google Custom Search Engine fetches industry news.
-Alpha Vantage API fetches market data and news sentiment.
-TextBlob analyzes sentiment of news.
-PDF is processed into chunks and embeddings.
-Embeddings are stored in ChromaDB.
-User query is combined with context from company details, news, sentiment, and relevant PDF chunks.
-Combined context is passed to Gemini Pro.
-Gemini Pro generates a response based on the context.
-Response is displayed to the user.
+•	User inputs company name and uploads PDF to Google Cloud Storage.
+•	Gemini Pro extracts company details.
+•	Google Custom Search Engine fetches industry news.
+•	Alpha Vantage API fetches market data and news sentiment.
+•	TextBlob analyzes sentiment of news.
+•	PDF is processed into chunks and embeddings.
+•	Embeddings are stored in ChromaDB.
+•	User query is combined with context from company details, news, sentiment, and relevant PDF chunks.
+•	Combined context is passed to Gemini Pro.
+•	Gemini Pro generates a response based on the context.
+•	Response is displayed to the user.
 
 Libraries:
-Google Cloud:
-    google-cloud-storage: For interacting with Google Cloud Storage.
-Vertex AI:
-    vertexai: The core library for accessing Vertex AI services.
-    vertexai.preview.generative_models: Specific tools for working with generative AI models.
-    vertexai.preview.language_models: Tools for text generation models.
-Language Processing & Embeddings:
-    langchain: Framework for building LLM applications.
-    langchain-community: Additional components for LangChain.
-    langchain-google-genai: Integration for Google's generative AI.
-    sentence-transformers: Creating sentence embeddings.
-    HuggingFaceEmbeddings: Integrating Hugging Face models into LangChain.
-Data Storage:
-    chromadb: Vector database for storing and searching embeddings.
-PDF Processing:
-    PyPDF2: For loading and extracting text from PDF files.
-Google APIs:
-    google-api-python-client: Client library for interacting with Google APIs.
-Financial Data:
-    alpha_vantage: API for accessing financial market data.
-    yfinance: Library for fetching financial data from Yahoo Finance.
-Sentiment Analysis:
-    textblob: Library for performing sentiment analysis.
-Other:
-    smart_open: For working with various file-like objects.
-    tiktoken: BPE tokenizer often used with OpenAI models.
+a.	Google Cloud:
+•	google-cloud-storage: For interacting with Google Cloud Storage.
+b.	Vertex AI:
+•	vertexai: The core library for accessing Vertex AI services.
+•	vertexai.preview.generative_models: Specific tools for working with generative AI models.
+•	vertexai.preview.language_models: Tools for text generation models.
+c.	Language Processing & Embeddings:
+•	langchain: Framework for building LLM applications.
+•	langchain-community: Additional components for LangChain.
+•	langchain-google-genai: Integration for Google's generative AI.
+•	sentence-transformers: Creating sentence embeddings.
+•	HuggingFaceEmbeddings: Integrating Hugging Face models into LangChain.
+d.	Data Storage:
+•	chromadb: Vector database for storing and searching embeddings.
+e.	PDF Processing:
+•	PyPDF2: For loading and extracting text from PDF files.
+f.	Google APIs:
+google-api-python-client: Client library for interacting with Google APIs.
+g.	Financial Data:
+•	alpha_vantage: API for accessing financial market data.
+•	yfinance: Library for fetching financial data from Yahoo Finance.
+h.	Sentiment Analysis:
+•	textblob: Library for performing sentiment analysis.
+i.	Other:
+•	smart_open: For working with various file-like objects.
+•	tiktoken: BPE tokenizer often used with OpenAI models.
 
 Tools:
-Google Colab: The development environment where you're running the code.
-Vertex AI Workbench: (Implicitly used) For managing and deploying models.
-Google Cloud Storage: For storing input files and model data.
-Hugging Face Hub: Repository of pre-trained models.
+•	Google Colab: The development environment where you're running the code.
+•	Vertex AI Workbench: (Implicitly used) For managing and deploying models.
+•	Google Cloud Storage: For storing input files and model data.
+•	Hugging Face Hub: Repository of pre-trained models.
 
 APIs:
-Google Custom Search Engine API: For fetching news and trends.
-Alpha Vantage API: For fetching financial market data and news sentiment.
+•	Google Custom Search Engine API: For fetching news and trends.
+•	Alpha Vantage API: For fetching financial market data and news sentiment.
 
 Google Cloud Elements:
-Vertex AI: The platform for building, deploying, and managing machine learning models.
-    Generative AI models: Gemini Pro is used for text generation and understanding.
-Google Cloud Storage: Cloud-based storage for your data.
-Authentication: Colab's authentication mechanism is used to access your Google Cloud resources securely.
+•	Vertex AI: The platform for building, deploying, and managing machine learning models.
+•	Generative AI models: Gemini Pro is used for text generation and understanding.
+•	Google Cloud Storage: Cloud-based storage for your data.
+•	Authentication: Colab's authentication mechanism is used to access your Google Cloud resources securely.
 
 
 
