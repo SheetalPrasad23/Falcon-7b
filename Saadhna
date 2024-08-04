@@ -1,3 +1,5 @@
+# Module 1: Initial Setup
+
 # Setup
 !pip install google-cloud-storage
 from google.cloud import storage
@@ -5,7 +7,16 @@ import os
 # Authenticate to Google Cloud
 from google.colab import auth
 auth.authenticate_user()
-# Define Functions to upload file in gcs
+
+# Module 2: Trigger User Input- Upload Annual report of a company and feed Company name
+
+# Prerequisite
+# Step 1- In Google Cloud Console, create a new project and link a billing account to it.
+#Step 2- Navigate to the Cloud Storage section and click "Create Bucket".
+#Step 3- Choose a unique bucket name, select a storage class and location, and click "Create".First, create a Vertex AI account and a project within the account. Then, enable billing for the project and create a storage bucket with input folders.
+bucket_name = 'corp_spec'
+folder_name = 'input_documents'
+# Input processing- Define Functions to upload file in gcs
 
 def upload_file_to_gcs(file_path, bucket_name, destination_blob_name):
     """Uploads a file to the bucket."""
@@ -18,9 +29,29 @@ def upload_file_to_gcs(file_path, bucket_name, destination_blob_name):
     # Construct and return the full GCS path
     gcs_path = f"gs://{bucket_name}/{destination_blob_name}"
     return gcs_path # Return the full GCS path
-print(annual_statement_path_i)
-!pip install PyPDF2
-from google.cloud import storage
+# User prompt trigger for Inputs
+def prompt_user_for_input():
+    """Prompts the user for input and returns the provided data."""
+    print("Please provide input for the following fields:")
+    annual_statement_i = input("Upload Annual Statement (pdf file): ")
+    company_name_i = input("Enter Company Name: ")
+    return annual_statement_i, company_name_i    #return annual_statement_i and company_name_i
+
+# Call function to upload the input file in GCS
+# Save input field (company name) as a variable
+bucket_name = 'corp_spec'
+folder_name = 'input_documents'
+
+annual_statement_i, company_name_i = prompt_user_for_input()
+
+annual_statement_path_i = None
+annual_statement_path_i = upload_file_to_gcs(annual_statement_i, bucket_name, f"{folder_name}/annual_statement.{annual_statement_i.split('.')[-1]}")
+
+company_name = company_name_i
+print("Annual statement uploaded to:", annual_statement_path_i)
+# Input processing- Define Functions to download file from gcs
+!pip install langchain langchain-community PyPDF2
+
 from io import BytesIO
 import smart_open
 from tempfile import NamedTemporaryFile
@@ -58,31 +89,13 @@ def get_pdf_temp_url(bucket_name, object_name):
 # Example Usage:
 from langchain.document_loaders import PyPDFLoader
 
-
-# user prompt trigger for file upload
-def prompt_user_for_input():
-    """Prompts the user for input and returns the provided data."""
-    print("Please provide input for the following fields:")
-    annual_statement_i = input("Upload Annual Statement (pdf file): ")
-    company_name_i = input("Enter Company Name: ")
-    return annual_statement_i, company_name_i    #return annual_statement_i and company_name_i
 bucket_name = "corp_spec"
 object_name = "input_documents/annual_statement.pdf"
 
 pdf_url = get_pdf_temp_url(bucket_name, object_name)
 print(pdf_url)
-# file path in gcs
-bucket_name = 'corp_spec'
-folder_name = 'input_documents'
 
-annual_statement_i, company_name_i = prompt_user_for_input()
-
-annual_statement_path_i = None
-annual_statement_path_i = upload_file_to_gcs(annual_statement_i, bucket_name, f"{folder_name}/annual_statement.{annual_statement_i.split('.')[-1]}")
-
-company_name = company_name_i
-print("Annual statement uploaded to:", annual_statement_path_i)
-#Module 3: Initialize LLM model- gemini-1.5-pro-001
+# Module 3: Initialize LLM model- gemini-1.5-pro-001
 # initiate setup and libraries
 import base64
 import vertexai
@@ -92,9 +105,7 @@ import vertexai.preview.generative_models as generative_models
 from vertexai.preview.language_models import TextGenerationModel
 PROJECT_ID = "trans-density-429404-a6"  # @param {type:"string"}
 LOCATION = "us-central1"  # @param {type:"string"}
-
 import vertexai
-
 vertexai.init(project=PROJECT_ID, location=LOCATION)
 import IPython.display
 from IPython.core.interactiveshell import InteractiveShell
@@ -109,8 +120,6 @@ from vertexai.generative_models import (
     Part,
 )
 MODEL_ID = "gemini-1.5-pro-001"  # @param {type:"string"}
-
-model = GenerativeModel(MODEL_ID)
 generation_config = {
     "max_output_tokens": 8192,
     "temperature": 1,
@@ -124,15 +133,16 @@ safety_settings = {
     generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
 }
 
-# Module 6: Extract general details about company- Company name, website, Relevant Industry and Products
-prompt = f"""for this company: {company_name}, generate following fields- Company website, Relevant Industries, List of close competitors, (Products and/or services)"""
+# Module 4: Extract general details about company- Company website, Relevant Industry and Products
+
+# Prompt for extracting relevant information
+prompt = f"""for this company: {company_name}, generate following fields- Company website, Relevant Industries, List of close competitors, Products/services"""
 print(prompt)
-# considering we have company name, using LLM, we will generate a. Company website, b. check whether company is Public listed company(1 or 0), c. if yes (1), generate the link to latest annual statement of the company
-# exception, in case data is not available, or compny recently listed
+# Define function to Extract data and Generate response
 def generate(prompt):
-    vertexai.inift(project="trans-density-429404-a6", location="us-central1")
+    vertexai.init(project="trans-density-429404-a6", location="us-central1")
     model = GenerativeModel(
-        "gemini-1.5-pro-001",
+        MODEL_ID,
         system_instruction=["""you have a company name as input, generate only the data asked in prompt in this format-
         field x: generated data relevant to field x
         ; field y: generated data relevant to field y"""]
@@ -169,6 +179,8 @@ saved_response_prep = generate(prompt)
 
 # Print the saved response
 print(saved_response_prep)
+# Split the response to save as individual variables
+
 fields = saved_response_prep.split(';')
 
 # Initialize variables to store the extracted values
@@ -176,9 +188,6 @@ company_website = "N/A"
 relevant_industry = "N/A"
 competitors ="N/A"
 products = "N/A"
-#listed_status = "N/A"
-#link_annual_st = "N/A"
-
 
 # Iterate over the fields and extract key-value pairs
 for field in fields:
@@ -193,7 +202,7 @@ for field in fields:
             relevant_industry = value
         elif key == "List of close competitors":
             competitors = value
-        elif key == "Products and/or services":
+        elif key == "Products/services":
             products = value
 
 # Loop through the variable names and values to print them
@@ -202,7 +211,8 @@ for var_name in [
 ]:
     value = globals()[var_name]  # Get the value of the variable using its name
     print(f"{var_name.replace('_', ' ')}: {value}")
-#Module 8: Call Custom Search Engine to extract latest News and trends on Company and Industry
+
+# Module 5: Call Custom Search Engine to extract latest News and trends on Company and Industry and Sentiment Analysis
 # First, install the required libraries
 !pip install google-api-python-client
 
@@ -214,29 +224,30 @@ from google.colab import userdata
 
 api_key = userdata.get('APIkeyCSE')
 cse_id = userdata.get('CSEid')
-# Function to perform Google search on Industry and trends
+# Function to perform Google search on Relevant Industry News and trends
 def google_search(query, api_key, cse_id, **kwargs):
     service = build("customsearch", "v1", developerKey=api_key)
     res = service.cse().list(q=query, cx=cse_id, **kwargs).execute()
     return res
 
 # Sample query
-query = f"""Industry report and trends for: {relevant_industry}"""
+query_ind = f"""Industry report and trends for: {relevant_industry}"""
 
 # Perform the search
-results = google_search(query, api_key, cse_id)
+results_ind = google_search(query_ind, api_key, cse_id)
 
 # Display results
-for item in results.get('items', []):
+for item in results_ind.get('items', []):
     print(f"Title: {item['title']}")
     print(f"Snippet: {item['snippet']}")
     print(f"Link: {item['link']}\n")
 
-print(results)
+print(results_ind)
 #print(results)
+# Extract title and snippets from Industry News response
 industry_title = []
 industry_snippet = []
-for item in results.get('items', []):
+for item in results_ind.get('items', []):
     industry_title.append(f"Title: {item['title']}")
 #    industry_snippet.append(f"Snippet: {item['snippet']}")
     industry_snippet.append(f"{item['snippet']}")
@@ -246,13 +257,9 @@ print(f"industry news snippets are {industry_snippet}")
 # Sentiment analysis
 from textblob import TextBlob
 
-# Initialize the TextBlob object with the news text
-# ticker1 = yf.Ticker(ticker)
-# news = ticker1.news
-
 # Extract sentiment scores
 sentiment_scores = []
-for item in results.get('items', []):
+for item in results_ind.get('items', []):
     analysis = TextBlob(item['snippet'])
     sentiment_scores.append(analysis.sentiment.polarity)  # -1 (negative) to 1 (positive)
 
@@ -279,15 +286,7 @@ elif sentiment_category == "Negative":
     print("Significance: This indicates a negative sentiment towards in recent news. Investors may interpret this as a warning sign or a potential for downward pressure on the stock price.")
 else:
     print("Significance: News sentiment is neutral, suggesting a lack of strong positive or negative opinions about in recent coverage. Investors may look for other indicators to gauge market sentiment.")
-
-# if sentiment_category == "Positive":
-#     print(f"Significance: This suggests a generally favorable outlook for {ticker} based on recent news coverage. Investors may interpret this as a sign of positive momentum.")
-# elif sentiment_category == "Negative":
-#     print(f"Significance: This indicates a negative sentiment towards {ticker} in recent news. Investors may interpret this as a warning sign or a potential for downward pressure on the stock price.")
-# else:
-#     print(f"Significance: News sentiment is neutral, suggesting a lack of strong positive or negative opinions about {ticker} in recent coverage. Investors may look for other indicators to gauge market sentiment.")
-
-# Function to perform News of company
+# Function to perform Google search on Company related News and trends
 def google_search(query, api_key, cse_id, **kwargs):
     service = build("customsearch", "v1", developerKey=api_key)
     res = service.cse().list(q=query, cx=cse_id, **kwargs).execute()
@@ -304,8 +303,8 @@ for item in results.get('items', []):
     print(f"Title: {item['title']}")
     print(f"Snippet: {item['snippet']}")
     print(f"Link: {item['link']}\n")
-
 #print(results)
+# Extract title and snippets from Company News response
 company_title = []
 company_snippet = []
 for item in results.get('items', []):
@@ -315,11 +314,12 @@ for item in results.get('items', []):
 print(f"company news titles are {company_title}")
 print(f"company news snippets are {company_snippet}")
 
-# Module 9: Call Yahoo finance API and extract market data available
+# Module 6: Call Alpha Vantage API and extract market data available
 
-!pip install alpha_vantage finance
+!pip install alpha_vantage
 from alpha_vantage.timeseries import TimeSeries
-# api_key for Alpha Vantage API key
+# Feed company name to extract ticker symbol (a unique grouping of letters that identifies a specific company, e.g. AAPL for Apple) 
+# Enter api_key for Alpha Vantage API key
 api_key = 'APIkeyAV'
 def find_ticker(company_name):
     ts = TimeSeries(key=api_key)
@@ -331,38 +331,56 @@ def find_ticker(company_name):
 
 ticker = find_ticker(company_name)
 print(f"The ticker symbol for {company_name} is {ticker}.")
-# Company Overview (direct dictionary access)
+print(ticker)
+import requests
+# Extract Company Overview
 overview_data = requests.get(
     f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={ticker}&apikey={api_key}"
 ).json()
 if overview_data:
     print("Company Overview:")
     print("\n".join(f"{k}: {v}" for k, v in overview_data.items()))
+# Extract Intraday data
+url = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={ticker}&interval=5min&apikey={api_key}'
+r = requests.get(url)
+data = r.json()
+print(data)
+# Time series Intraday data plotting
+# import requests
+import matplotlib.pyplot as plt
+import pandas as pd
+import matplotlib.dates as mdates
 
-#news sentiment
-NEWS_sentiment = requests.get(
-    f"https://www.alphavantage.co/query?function=NEWS_SENTIMENT&symbol={ticker}&apikey={api_key}"
-).json()
-if NEWS_sentiment:
-    print("senti:")
-    print("\n".join(f"{k}: {v}" for k, v in NEWS_sentiment.items()))
+# # Alpha Vantage API call (assuming ticker symbol and 5-minute interval)
+# Data Extraction and Transformation
+time_series_data = data['Time Series (5min)']
+df = pd.DataFrame.from_dict(time_series_data, orient='index')
+df = df.astype(float)
+df.index = pd.to_datetime(df.index)
+df = df.sort_index()
 
-# News Data (using the requests library directly)
-news_url = f"https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers={ticker}&apikey={api_key}"
-news_response = requests.get(news_url).json()
+# Plotting
+plt.figure(figsize=(12, 6))
+plt.plot(df['4. close'], marker='o', linestyle='-')
+plt.title(f'{ticker} Intraday 5-minute Close Prices')
+plt.xlabel('Time (US/Eastern)')
+plt.ylabel('Close Price')
+plt.grid(axis='y')
 
-if news_response and "feed" in news_response:
-    print("\nLatest News:")
-    for article in news_response["feed"][:3]:  # Get the first 3 articles
-        print(f"\nHeadline: {article['title']}")
-        print(f"Date: {article['time_published']}")
-        print(f"URL: {article['url']}")
-else:
-    print("No news data available.")
 
-# Module 4: Breakdown unstructured pdf into Vector Embeddings
+# Create a new DataFrame with hourly data (for tick locations)
+hourly_df = df.resample('H').last()  # Resample to hourly intervals
 
-# Module 8.0:  Initiating libraries for Langchain
+# Format x-axis labels to display only hours
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H'))
+plt.xticks(hourly_df.index)  # Set the x ticks to be at the hour positions
+
+plt.tight_layout()
+plt.show()
+
+# Module 7: Breakdown unstructured pdf into Vector Embeddings
+
+# Initiating libraries for Langchain
 !pip install langchain
 !pip install langchain-community
 !pip install pypdf
@@ -371,8 +389,6 @@ else:
 !pip install sentence-transformers
 !pip install google.generativeai
 !pip install langchain-google-genai
-import chromadb
-import numpy as np
 from langchain.document_loaders import PyPDFLoader
 from langchain import ConversationChain, LLMChain
 from langchain.memory import SimpleMemory
@@ -382,52 +398,55 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
+
 from sentence_transformers import SentenceTransformer
 from chromadb.api.types import Documents, Embeddings
+
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import chromadb
-from sentence_transformers import SentenceTransformer
-from chromadb.api.types import Documents, Embeddings
 import numpy as np
 from google.colab import userdata
-print(annual_statement_path_i)
-# Set up the environment variable for Google API Key
+# Set up the environment variable for Google API Key (Store in secrets)
+
 import os
-# os.environ["GOOGLE_API_KEY"] = "AIzaSyAxIZBdPiuqiO4iGYDThF_kMNztMytj-xx"
 os.environ["GOOGLE_API_KEY"] = userdata.get('gcloudAPIKey')
-# Creating and adding Embeddings in collection
+# Building up the additional context from Modules 4, 5 and 6
+add_context = f"Relevant industry is {relevant_industry}, \n Industry news sentiment is {sentiment}, \n company offerings are {products}, \n industry news snippets are {industry_snippet},\n Intraday company data is {data}"
+print(add_context)
+# PDF processing and adding additional context
 
 # Step 1: Load the PDF document
 
-# pdf_loader = PyPDFLoader("/content/Annual_statement.pdf")
 pdf_loader = PyPDFLoader(pdf_url)
 
 documents = pdf_loader.load()
 total_pages = len(documents)
 print(f"PDF loaded with {total_pages} pages.")
+all_text = ""
+for document in documents:
+    all_text += document.page_content + "\n\n"
 
-# Step 2: Split the text for embedding (with progress visualization)
-text_splitter = CharacterTextSplitter()
-texts = []
-for i, document in enumerate(documents):
-    texts.extend(text_splitter.split_text(document.page_content))
-    print(f"Processed page {i + 1} of {total_pages}")
+# Add the additional context only once to the combined text
+all_text += add_context  
+texts = text_splitter.split_text(all_text) 
+
+print(f"Total chunks created: {len(texts)}")
 
 # Step 3: Initialize Sentence Transformer model
 model_batch = SentenceTransformer('all-MiniLM-L6-v2')
-
 # Step 4: Process in batches
 batch_size = 100
 embeddings = []
+# metadata = []
 for i in range(0, len(texts), batch_size):
     batch_texts = texts[i:i+batch_size]
     print(f"Encoding batch starting at index {i}")
     batch_embeddings = model_batch.encode(batch_texts, show_progress_bar=True)
     embeddings.append(batch_embeddings)
-
+# Creating and adding Embeddings in collection
 # Step 5: Concatenate all batch embeddings
 embeddings_np = np.concatenate(embeddings, axis=0)
 
@@ -437,34 +456,39 @@ client1 = chromadb.Client()
 
 # Step 8: Create a Chroma collection
 # Delete the collection if it exists
-# client.delete_collection("my_collection")
+client1.delete_collection("my_collection")
 collection = client1.create_collection("my_collection")
 
 # Step 9: Add embeddings to the collection
 collection.add(
     embeddings=embeddings_np.tolist(),
     documents=texts,
-    ids=[str(i) for i in range(len(embeddings_np))]  # Convert IDs to strings
+    ids=[str(i) for i in range(len(embeddings_np))],
+    # metadata= metadata
 )
 # Get a sample of documents from the collection
 sample_docs = collection.get(limit=5)
 
 # Print the sample documents
 print(sample_docs)
+
+# Module 8: Feed embeddings to gemini-1.5.pro model for insights
 !pip install langchain huggingface_hub transformers
+
+
 
 from langchain.embeddings import HuggingFaceEmbeddings
 
-# Replace with the desired model name from Hugging Face
 model_embed = "sentence-transformers/all-MiniLM-L6-v2"
 
 embeddings1 = HuggingFaceEmbeddings(
     model_name=model_embed
-)
-# Initialize the LLM
+)# Feed embeddings to LLM along with query
+
 llm = ChatGoogleGenerativeAI(model=MODEL_ID, temperature=1)
+
 vectorstore = Chroma(
-    client=client1,  # Use the same client from the first part
+    client=client1,  # Use the same client from the Module 7
     collection_name="my_collection",
     embedding_function=embeddings1
 )
@@ -480,6 +504,7 @@ def create_retrieval_chain(retriever, combine_docs_chain):
         return_source_documents=True,
     )
 
+
 # Create the retrieval chain
 template = """You are a very professional document summarization and analysis specialist.
   Understand the factors for company profitability in context of the annual statement attached in pdf_file,
@@ -490,16 +515,17 @@ input: {input}
 answer:
 """
 
-
 prompt = PromptTemplate.from_template(template)
 combine_docs_chain = create_stuff_documents_chain(llm, prompt)
 retrieval_chain = create_retrieval_chain(retriever, combine_docs_chain)
-response=retrieval_chain.invoke({"query":"as an consultant, what should be the company strategy for new products and services?"})
+response=retrieval_chain.invoke({"query":"industry sentiment? market data? net profit?"})   #, what should be the company strategy for new products and services?"})
+
 #Print the answer to the question
 print(response["result"])
 
-# Module 7a: Build a chatbot to respond in live chat session
+# Module 9: Build a chatbot to respond in live chat session
 
+# Create a Chatbot 
 conversation_history = []  # List to store conversation history
 
 def prompt_chatbot_query():
@@ -513,7 +539,13 @@ def prompt_chatbot_query():
 
         # Create context including previous conversation
         history_str = "\n".join([f"User: {turn['query']}\nBot: {turn.get('result', '')}" for turn in conversation_history])
-        context = f"{history_str}\nCurrent query: {user_input}"
+        # context = f"You are a document summarizer, based on the {history_str}\nCurrent query: {user_input}\n {add_context}"
+        context = f"""You are a very professional document summarization and expert financial analyst. 
+       Understand the factors and interdependencies, and respond as an expert with useful insights, provide simple tabular presentation, if needed.
+
+         \n answer concisely \n
+        {history_str}\nCurrent query: {user_input}"""
+
 
         # Invoke retrieval chain with the updated context
         response = retrieval_chain.invoke({"query": context, "input": user_input})
@@ -524,3 +556,5 @@ def prompt_chatbot_query():
         print(response["result"])
 
 prompt_chatbot_query()
+
+
