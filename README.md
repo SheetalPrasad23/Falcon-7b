@@ -2,26 +2,41 @@
 **Unlocking Corporate Insights with AI: Your Interactive Financial Analyst- GC CorpSpectrum**
 
 Imagine having an AI-powered analyst that instantly distills the most critical information as well as draw insights from a company's financial statements, news, and market trends. That's exactly what we're building today!
+
     Gather data seamlessly and fuse together
+
     Extract key metrics and trends
+    
     Create an interactive chatbot for insightful summaries
+
 **What will you learn?
 **
+
  Discover the power of Large Language Models (LLMs) and their application in extracting insights from complex data.
+
  Gain hands-on experience with Google Cloud's Vertex AI and Cloud Storage for building AI solutions.
+
  Learn to integrate structured and unstructured data for comprehensive financial analysis.
+
  Build an interactive chatbot using LangChain that enables conversational exploration of financial data.
+
  Understand embeddings and their role in semantic search and analysis for financial insights.
+
  Witness a real-world application of AI and cloud technologies in financial analysis.
+
  Build a strong foundation to create your own AI-driven financial tools.
+
 
 Gain hands-on experience with Google Cloud and build a powerful tool for navigating the corporate world. Let's dive in!
     
+
 **Data Flow:
 **
 
 Libraries:
+
     Google Cloud: google-cloud-storage: For interacting with Google Cloud Storage.
+    
     Vertex AI: vertexai: The core library for accessing Vertex AI services. vertexai.preview.generative_models: Specific tools for working with generative AI models. vertexai.preview.language_models: Tools for text generation models.
     Language Processing & Embeddings: langchain: Framework for building LLM applications. langchain-community: Additional components for LangChain. langchain-google-genai: Integration for Google's generative AI. sentence-transformers: Creating sentence embeddings. HuggingFaceEmbeddings: Integrating Hugging Face models into LangChain.
     Data Storage: chromadb: Vector database for storing and searching embeddings.
