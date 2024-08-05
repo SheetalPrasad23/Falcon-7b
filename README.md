@@ -91,7 +91,7 @@ This section sets up the foundation for your project:
 Install Google Cloud Storage Library:
 
 
-  !pip install google-cloud-storage
+      !pip install google-cloud-storage
 
 This command uses pip, the Python package installer, to download and install the google-cloud-storage library. This library provides the tools to interact with Google Cloud Storage (GCS), where you'll store and retrieve data.
 
