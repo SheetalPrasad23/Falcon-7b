@@ -98,9 +98,9 @@ This command uses pip, the Python package installer, to download and install the
 
 Import Necessary Modules:
 
-  from google.cloud import storage
+      from google.cloud import storage
  
-  import os
+      import os
 
 
 1. from google.cloud import storage: This line imports the core storage module from the library, giving you the classes and functions needed to work with GCS buckets and objects.
@@ -116,14 +116,14 @@ This code handles the secure login process:
 
   Import Authentication Module:
   
-  from google.colab import auth
+      from google.colab import auth
 
 This line imports the auth module from the google.colab library. This module provides functions specifically designed for authenticating to Google Cloud services within a Colab environment.
 
 
 Authenticate User:
 
-  auth.authenticate_user()
+      auth.authenticate_user()
 
 This function initiates the authentication process. Typically, it will:
 
@@ -151,7 +151,7 @@ Prerequisite
 
 Define Helper Functions:
 
-  upload_file_to_gcs(file_path, bucket_name, destination_blob_name):
+    upload_file_to_gcs(file_path, bucket_name, destination_blob_name):
 
     Takes a local file path, the GCS bucket name, and the desired name for the file in GCS.
     
@@ -213,17 +213,17 @@ Other libraries for handling JSON, base64 encoding, and displaying outputs.
 
 
 
-  import base64
+      import base64
   
-  import vertexai
+      import vertexai
   
-  import json
+      import json
   
-  from vertexai.generative_models import GenerativeModel, Part, FinishReason
+      from vertexai.generative_models import GenerativeModel, Part, FinishReason
   
-  import vertexai.preview.generative_models as generative_models
+      import vertexai.preview.generative_models as generative_models
   
-  from vertexai.preview.language_models import TextGenerationModel
+      from vertexai.preview.language_models import TextGenerationModel
 
 
 
@@ -253,27 +253,27 @@ This part uses the Gemini Pro model to gather information about the company:
 
 Craft the Prompt:
 
-  prompt = f"for this company: {company_name}, generate following fields...":
+      prompt = f"for this company: {company_name}, generate following fields...":
 
 This creates a clear instruction for the model, asking it to provide details like the company website, industry, competitors, and products. Notice how we embed the company_name variable directly into the prompt, making it dynamic.
 
 Define the generate Function:
 
-  def generate(prompt):
+      def generate(prompt):
 
-      vertexai.init(project="trans-density-429404-a6", location="us-central1")
+          vertexai.init(project="trans-density-429404-a6", location="us-central1")
       
-      model = GenerativeModel(
+          model = GenerativeModel(
       
-      "gemini-1.5-pro-001",
+          "gemini-1.5-pro-001",
       
-      system_instruction=["""you have a company name as input, generate only the data asked in prompt in this format-
+          system_instruction=["""you have a company name as input, generate only the data asked in prompt in this format-
       
-      field x: generated data relevant to field x
+          field x: generated data relevant to field x
       
-      ; field y: generated data relevant to field y"""]
+          ; field y: generated data relevant to field y"""]
   
-  )
+      )
 
 
 This function encapsulates the interaction with the Gemini Pro model.
@@ -281,17 +281,17 @@ This function encapsulates the interaction with the Gemini Pro model.
 Generate the Response:
 
 
-  responses = model.generate_content(
+      responses = model.generate_content(
   
-      [prompt],
+          [prompt],
       
-      generation_config=generation_config,
+          generation_config=generation_config,
       
-      safety_settings=safety_settings,
+          safety_settings=safety_settings,
       
-      stream=True,
+          stream=True,
   
-  )
+      )
   
 
 Process the Response:
@@ -315,11 +315,11 @@ This part fetches relevant information from the web using Google's search capabi
 
 Install the API Client:
 
-  !pip install google-api-python-client
+      !pip install google-api-python-client
   
   # Import necessary libraries
   
-  from googleapiclient.discovery import build
+      from googleapiclient.discovery import build
 
 
 This installs the necessary library for interacting with Google APIs.
@@ -330,11 +330,11 @@ Import the build function to create service objects for interacting with APIs.
 
   # Define your API key and Search Engine ID
   
-  from google.colab import userdata
+      from google.colab import userdata
   
-  api_key = userdata.get('APIkeyCSE')
+      api_key = userdata.get('APIkeyCSE')
   
-  cse_id = userdata.get('CSEid')
+      cse_id = userdata.get('CSEid')
 
 Get your API key (api_key) from Vertex AI platform and Custom Search Engine ID (cse_id) from https://programmablesearchengine.google.com/controlpanel/all.
 
@@ -344,21 +344,21 @@ This function takes a search query, your credentials, and optional parameters (*
 
 # Function to perform Google search on Industry and trends
 
-  def google_search(query, api_key, cse_id, **kwargs):
+      def google_search(query, api_key, cse_id, **kwargs):
   
-    service = build("customsearch", "v1", developerKey=api_key)
+        service = build("customsearch", "v1", developerKey=api_key)
   
-    res = service.cse().list(q=query, cx=cse_id, **kwargs).execute()
+        res = service.cse().list(q=query, cx=cse_id, **kwargs).execute()
     
-    return res
+        return res
 
 Construct the Query and Execute the search:
 
-  query_ind = f"""Industry report and trends for: {relevant_industry}"""
+      query_ind = f"""Industry report and trends for: {relevant_industry}"""
 
 This dynamically inserts the relevant_industry extracted in the previous step to create a targeted search query.
 
-  results_ind = google_search(query_ind, api_key, cse_id)
+      results_ind = google_search(query_ind, api_key, cse_id)
 
 This calls the google_search function to perform the search and stores the results.
 
@@ -371,19 +371,19 @@ Creates lists to store all news titles (industry_title) and all news snippets (i
 
 Analyze Sentiment (with TextBlob):
 
-  Imports TextBlob for sentiment analysis. # Sentiment analysis from textblob import TextBlob
+      Imports TextBlob for sentiment analysis. # Sentiment analysis from textblob import TextBlob
 
 Initializes TextBlob objects for each news title and calculate sentiment polarity scores (ranging from -1 to 1) and Calculate average sentiment.
 
-  for item in results_ind.get('items', []):
+      for item in results_ind.get('items', []):
   
-  analysis = TextBlob(item['snippet'])
+      analysis = TextBlob(item['snippet'])
   
-  sentiment_scores.append(analysis.sentiment.polarity)  # -1 (negative) to 1 (positive)
+      sentiment_scores.append(analysis.sentiment.polarity)  # -1 (negative) to 1 (positive)
   
-  average_sentiment = sum(sentiment_scores) / len(sentiment_scores)
+      average_sentiment = sum(sentiment_scores) / len(sentiment_scores)
   
-  print("Average News Sentiment:", average_sentiment)
+      print("Average News Sentiment:", average_sentiment)
 
 
 In a similar way, We can find relevant news and trends about company, its competitors or market to expand the scope of code functionality.
@@ -404,41 +404,41 @@ Prerequisite:
 
 Install the Library:
 
-  !pip install alpha_vantage
+      !pip install alpha_vantage
 
 This installs the alpha_vantage library to interact with their financial data API.
 
 Import and Set API Key: Import the TimeSeries class from the library. Provide your Alpha Vantage API key (api_key).
  
-  from alpha_vantage.timeseries import TimeSeries
+      from alpha_vantage.timeseries import TimeSeries
   
 #api_key for Alpha Vantage API key
   
-  api_key = 'APIkeyAV'
+      api_key = 'APIkeyAV'
 
 Define find_ticker Function: Takes the company_name as input, and uses the get_symbol_search method to query Alpha Vantage for potential ticker symbols associated with the company. (ticker symbol- a unique grouping of letters that identifies a specific company, e.g. AAPL for Apple)
 
-  def find_ticker(company_name):
+      def find_ticker(company_name):
   
-      ts = TimeSeries(key=api_key)
+          ts = TimeSeries(key=api_key)
       
-      data, meta_data = ts.get_symbol_search(company_name)
+          data, meta_data = ts.get_symbol_search(company_name)
       
-      if not data.empty:  # Check if the DataFrame is empty
+          if not data.empty:  # Check if the DataFrame is empty
       
-          return data.iloc[0]['1. symbol'] # Access the first row and '1. symbol' column
+              return data.iloc[0]['1. symbol'] # Access the first row and '1. symbol' column
       
-      else:
+          else:
       
-          return "Ticker not found."
+              return "Ticker not found."
 
 Fetch Company Overview through Alpha Vantage: Constructs a URL for fetching company overview data using the ticker found in the previous step.
 
-  overview_data = requests.get(
+      overview_data = requests.get(
   
-    f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={ticker}&apikey={api_key}"
+        f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={ticker}&apikey={api_key}"
     
-    ).json()
+        ).json()
 
 
 Time series Intraday data plotting:
@@ -446,23 +446,23 @@ Time series Intraday data plotting:
 Importing libraries
 
   
-  import matplotlib.pyplot as plt
+      import matplotlib.pyplot as plt
   
-  import pandas as pd
-  
-  import matplotlib.dates as mdates
+      import pandas as pd
+      
+      import matplotlib.dates as mdates
 
 Data extraction and transformation
 
-  time_series_data = data['Time Series (5min)']
+      time_series_data = data['Time Series (5min)']
 
-  df = pd.DataFrame.from_dict(time_series_data, orient='index')
+      df = pd.DataFrame.from_dict(time_series_data, orient='index')
   
-  df = df.astype(float)
+      df = df.astype(float)
   
-  df.index = pd.to_datetime(df.index)
+      df.index = pd.to_datetime(df.index)
   
-  df = df.sort_index()
+      df = df.sort_index()
  
 To explore market details about a company, follow instructions in https://www.alphavantage.co/documentation/
      
@@ -473,33 +473,33 @@ This step is where we transform the unstructured text of the annual statement in
 
 Install Required Libraries: These commands install a suite of libraries essential for text processing, embedding generation, and working with the Gemini models:
 
-  !pip install langchain    # langchain: A framework for building applications powered by language models.
+      !pip install langchain    # langchain: A framework for building applications powered by language models.
   
-  !pip install langchain-community    # langchain-community: Additional components for LangChain.
+      !pip install langchain-community    # langchain-community: Additional components for LangChain.
   
-  !pip install pypdf    # pypdf: A library for parsing PDF files.
+      !pip install pypdf    # pypdf: A library for parsing PDF files.
   
-  !pip install --upgrade chromadb    # chromadb: A vector database for efficient storage and retrieval of embeddings.
+      !pip install --upgrade chromadb    # chromadb: A vector database for efficient storage and retrieval of embeddings.
   
-  !pip install tiktoken    # tiktoken: A fast BPE tokenizer often used with OpenAI models.
+      !pip install tiktoken    # tiktoken: A fast BPE tokenizer often used with OpenAI models.
   
-  !pip install sentence-transformers    # sentence-transformers: Library for generating high-quality sentence embeddings.
+      !pip install sentence-transformers    # sentence-transformers: Library for generating high-quality sentence embeddings.
   
-  !pip install google.generativeai    # google.generativeai: Official Google library for working with their generative AI models.
+      !pip install google.generativeai    # google.generativeai: Official Google library for working with their generative AI models.
   
-  !pip install langchain-google-genai    # langchain-google-genai: Integration of Google's generative AI capabilities into LangChain.
+      !pip install langchain-google-genai    # langchain-google-genai: Integration of Google's generative AI capabilities into LangChain.
 
 Import Necessary Modules:
 
-  import chromadb
+      import chromadb
 
-  import numpy as np
+      import numpy as np
   
-#...(other imports related to langchain, sentence-transformers, chromadb, etc.)
+        #...(other imports related to langchain, sentence-transformers, chromadb, etc.)
 
 Set Environment Variable for Google API Key:
 
-  os.environ["GOOGLE_API_KEY"] = userdata.get('gcloudAPIKey')
+      os.environ["GOOGLE_API_KEY"] = userdata.get('gcloudAPIKey')
 
 This retrieves your Google Cloud API key (which you presumably stored in Colab's userdata) and sets it as an environment variable. This allows the libraries to automatically authenticate and access Google Cloud services.
 
@@ -525,9 +525,9 @@ Load the PDF: pdf_loader = PyPDFLoader(pdf_url): This loads the annual statement
 
 Add context from Module 4,5,6:
 
-  add_context = f"Relevant industry is {relevant_industry}, \n Industry news sentiment is {sentiment}, \n company offerings are {products}, \n industry news snippets are {industry_snippet},\n Intraday company data is {data}"
+      add_context = f"Relevant industry is {relevant_industry}, \n Industry news sentiment is {sentiment}, \n company offerings are {products}, \n industry news snippets are {industry_snippet},\n Intraday company data is {data}"
 
-  all_text += add_context  
+      all_text += add_context  
   
 Split the Text: text_splitter.split_text(all_text): Creates a text splitter that breaks the document into smaller chunks based on a maximum character count. Initializes an empty texts list to store the chunks. Iterates over each document (page) and Splits the page content into chunks using the text splitter and adds them to the texts list.
 
@@ -547,7 +547,7 @@ Get and Print Sample Documents: sample_docs = collection.get(limit=5): Retrieves
 
 Get and Print Sample Documents:
 
-  sample_docs = collection.get(limit=5): Retrieves 5 random documents from the collection.
+      sample_docs = collection.get(limit=5): Retrieves 5 random documents from the collection.
 
 Key Takeaways:
 
@@ -564,7 +564,7 @@ Batch Processing: Processing embeddings in batches helps manage memory usage and
 
 This short but crucial step bridges the gap between your text embeddings and the language model:
 
-  !pip install langchain huggingface_hub transformers
+      !pip install langchain huggingface_hub transformers
 
 huggingface_hub: This library gives you access to a vast repository of pre-trained machine learning models hosted on the Hugging Face Hub. This includes the sentence embedding model you'll be using here.
 
@@ -572,11 +572,11 @@ transformers: This library provides the tools to load and use those models in yo
 
 Import and Load Hugging Face Embeddings:
 
-  from langchain.embeddings import HuggingFaceEmbeddings
+      from langchain.embeddings import HuggingFaceEmbeddings
   
-  model_embed = "sentence-transformers/all-MiniLM-L6-v2"  
+      model_embed = "sentence-transformers/all-MiniLM-L6-v2"  
   
-  embeddings1 = HuggingFaceEmbeddings(model_name=model_embed)
+      embeddings1 = HuggingFaceEmbeddings(model_name=model_embed)
 
 
 HuggingFaceEmbeddings: This class from LangChain is specifically designed to work with embedding models from the Hugging Face Hub.
@@ -625,13 +625,13 @@ Prompt Engineering: The prompt template guides the LLM's behavior, ensuring it f
 
 This section brings it all together, allowing you to converse with your data:
 
-Conversation History:
+    Conversation History:
 
-  conversation_history = []:
+      conversation_history = []:
 
 An empty list is initialized to store the history of the conversation. Each turn (user query and bot response) will be appended to this list as a dictionary.
 
-prompt_chatbot_query Function:
+    prompt_chatbot_query Function:
 
 This function defines the main interaction loop of the chatbot:
 
