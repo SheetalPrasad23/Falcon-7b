@@ -412,7 +412,7 @@ Import and Set API Key: Import the TimeSeries class from the library. Provide yo
  
   from alpha_vantage.timeseries import TimeSeries
   
-  # api_key for Alpha Vantage API key
+#api_key for Alpha Vantage API key
   
   api_key = 'APIkeyAV'
 
